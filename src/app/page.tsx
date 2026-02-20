@@ -93,21 +93,21 @@ function HomeContent() {
   const isSuperAdmin = profile?.is_super_admin;
 
   return (
-    <main className="min-h-screen bg-surface text-gray-800">
-      <header className="bg-white border-b border-gray-200 p-4 shadow-sm">
+    <main className="min-h-screen bg-surface text-foreground">
+      <header className="bg-card border-b border-border p-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-brand to-brand-dark rounded-lg flex items-center justify-center shadow-sm">
+              <div className="w-8 h-8 bg-gradient-to-br from-brand to-brand-dark rounded-lg flex items-center justify-center shadow-lg">
                 <span className="font-bold text-white">K</span>
               </div>
-              <span className="font-bold text-xl text-gray-900">Kanux</span>
+              <span className="font-bold text-xl text-foreground">Kanux</span>
             </div>
             {companies.length > 1 && (
               <select
                 value={currentCompanyId}
                 onChange={(e) => setCurrentCompanyId(e.target.value)}
-                className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand/20"
+                className="bg-muted border border-border rounded-lg px-3 py-1.5 text-sm text-foreground"
               >
                 {companies.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -122,9 +122,9 @@ function HomeContent() {
               <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center text-sm font-semibold text-white">
                 {profile?.display_name?.charAt(0).toUpperCase() || "U"}
               </div>
-              <span className="text-sm text-gray-600">{profile?.display_name}</span>
+              <span className="text-sm text-muted-foreground">{profile?.display_name}</span>
             </div>
-            <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-brand transition">
+            <button onClick={handleLogout} className="text-sm text-muted-foreground hover:text-brand transition">
               Sair
             </button>
           </div>
@@ -133,56 +133,56 @@ function HomeContent() {
 
       <div className="max-w-7xl mx-auto p-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-foreground">
             Bem-vindo{currentCompany ? ` à ${currentCompany.name}` : ""}!
           </h1>
-          <p className="text-gray-500 mt-1">O que você gostaria de fazer hoje?</p>
+          <p className="text-muted-foreground mt-1">O que você gostaria de fazer hoje?</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <button
             onClick={() => router.push(`/chats?companyId=${currentCompanyId}`)}
-            className="p-6 bg-white rounded-xl border border-gray-200 hover:border-brand hover:shadow-floating transition group text-left"
+            className="p-6 bg-card rounded-xl border border-border hover:border-brand hover:shadow-floating transition group text-left"
           >
             <div className="w-12 h-12 bg-brand/10 rounded-lg flex items-center justify-center mb-4">
               <svg className="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
-            <h3 className="font-semibold text-lg text-gray-900">Chats</h3>
-            <p className="text-sm text-gray-500 mt-1">Converse com sua equipe</p>
+            <h3 className="font-semibold text-lg text-foreground">Chats</h3>
+            <p className="text-sm text-muted-foreground mt-1">Converse com sua equipe</p>
           </button>
 
           <button
             onClick={() => router.push(`/tickets?companyId=${currentCompanyId}`)}
-            className="p-6 bg-white rounded-xl border border-gray-200 hover:border-brand hover:shadow-floating transition group text-left"
+            className="p-6 bg-card rounded-xl border border-border hover:border-brand hover:shadow-floating transition group text-left"
           >
             <div className="w-12 h-12 bg-brand/10 rounded-lg flex items-center justify-center mb-4">
               <svg className="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
               </svg>
             </div>
-            <h3 className="font-semibold text-lg text-gray-900">Chamados</h3>
-            <p className="text-sm text-gray-500 mt-1">Abra e acompanhe tickets</p>
+            <h3 className="font-semibold text-lg text-foreground">Chamados</h3>
+            <p className="text-sm text-muted-foreground mt-1">Abra e acompanhe tickets</p>
           </button>
 
           <button
             onClick={() => router.push(`/profile`)}
-            className="p-6 bg-white rounded-xl border border-gray-200 hover:border-brand hover:shadow-floating transition group text-left"
+            className="p-6 bg-card rounded-xl border border-border hover:border-brand hover:shadow-floating transition group text-left"
           >
             <div className="w-12 h-12 bg-brand/10 rounded-lg flex items-center justify-center mb-4">
               <svg className="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
-            <h3 className="font-semibold text-lg text-gray-900">Meu Perfil</h3>
-            <p className="text-sm text-gray-500 mt-1">Edite suas informações</p>
+            <h3 className="font-semibold text-lg text-foreground">Meu Perfil</h3>
+            <p className="text-sm text-muted-foreground mt-1">Edite suas informações</p>
           </button>
 
           {(isSuperAdmin || profile?.role === "ADMIN") && (
             <button
               onClick={() => router.push(`/admin?companyId=${currentCompanyId}`)}
-              className="p-6 bg-white rounded-xl border border-gray-200 hover:border-brand hover:shadow-floating transition group text-left"
+              className="p-6 bg-card rounded-xl border border-border hover:border-brand hover:shadow-floating transition group text-left"
             >
               <div className="w-12 h-12 bg-brand/10 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,8 +190,8 @@ function HomeContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-lg text-gray-900">Admin</h3>
-              <p className="text-sm text-gray-500 mt-1">Gerencie a empresa</p>
+              <h3 className="font-semibold text-lg text-foreground">Admin</h3>
+              <p className="text-sm text-muted-foreground mt-1">Gerencie a empresa</p>
             </button>
           )}
         </div>
@@ -199,19 +199,19 @@ function HomeContent() {
         {isSuperAdmin && (
           <div className="mt-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Todas as Empresas</h2>
+              <h2 className="text-xl font-semibold text-foreground">Todas as Empresas</h2>
               <button
                 onClick={() => router.push(`/admin?companyId=${currentCompanyId}`)}
-                className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition text-sm shadow-sm"
+                className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition text-sm"
               >
                 + Nova Empresa
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {companies.map((company) => (
-                <div key={company.id} className="p-4 bg-white rounded-lg border border-gray-200 shadow-card">
-                  <h3 className="font-semibold text-gray-900">{company.name}</h3>
-                  <p className="text-sm text-gray-500">@{company.slug}</p>
+                <div key={company.id} className="p-4 bg-card rounded-lg border border-border">
+                  <h3 className="font-semibold text-foreground">{company.name}</h3>
+                  <p className="text-sm text-muted-foreground">@{company.slug}</p>
                 </div>
               ))}
             </div>
@@ -219,16 +219,16 @@ function HomeContent() {
         )}
 
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-white rounded-lg border border-gray-200 shadow-card">
-            <p className="text-sm text-gray-500">Empresas</p>
-            <p className="text-2xl font-bold text-gray-900">{companies.length}</p>
+          <div className="p-4 bg-card rounded-lg border border-border">
+            <p className="text-sm text-muted-foreground">Empresas</p>
+            <p className="text-2xl font-bold text-foreground">{companies.length}</p>
           </div>
-          <div className="p-4 bg-white rounded-lg border border-gray-200 shadow-card">
-            <p className="text-sm text-gray-500">Seu Papel</p>
-            <p className="text-2xl font-bold text-gray-900">{isSuperAdmin ? "Super Admin" : profile?.role || "Membro"}</p>
+          <div className="p-4 bg-card rounded-lg border border-border">
+            <p className="text-sm text-muted-foreground">Seu Papel</p>
+            <p className="text-2xl font-bold text-foreground">{isSuperAdmin ? "Super Admin" : profile?.role || "Membro"}</p>
           </div>
-          <div className="p-4 bg-white rounded-lg border border-gray-200 shadow-card">
-            <p className="text-sm text-gray-500">Status</p>
+          <div className="p-4 bg-card rounded-lg border border-border">
+            <p className="text-sm text-muted-foreground">Status</p>
             <p className="text-2xl font-bold text-brand">● Ativo</p>
           </div>
         </div>

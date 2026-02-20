@@ -240,15 +240,15 @@ function AdminPageContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
       </div>
     );
   }
 
   if (!session || !profile?.is_super_admin) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen bg-surface flex items-center justify-center p-4">
         <LoginForm />
       </div>
     );
@@ -263,12 +263,12 @@ function AdminPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-surface text-foreground">
       <header className="bg-card border-b border-border p-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button onClick={() => router.push("/")} className="text-muted-foreground hover:text-white">← Voltar</button>
-            <h1 className="text-xl font-bold">Painel Admin</h1>
+            <button onClick={() => router.push("/")} className="text-muted-foreground hover:text-brand transition">← Voltar</button>
+            <h1 className="text-xl font-bold text-foreground">Painel Admin</h1>
           </div>
           <select
             value={currentCompany?.id || ""}
@@ -276,7 +276,7 @@ function AdminPageContent() {
               const company = companies.find(c => c.id === e.target.value);
               setCurrentCompany(company || null);
             }}
-            className="bg-muted border border-border rounded px-3 py-1.5 text-sm"
+            className="bg-muted border border-border rounded px-3 py-1.5 text-sm text-foreground"
           >
             <option value="">Selecione uma empresa</option>
             {companies.map(c => (
@@ -292,8 +292,10 @@ function AdminPageContent() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded text-sm font-medium whitespace-nowrap ${
-                activeTab === tab ? "bg-emerald-600 text-white" : "text-muted-foreground hover:text-white hover:bg-muted"
+              className={`px-4 py-2 rounded text-sm font-medium whitespace-nowrap transition ${
+                activeTab === tab 
+                  ? "bg-brand text-white" 
+                  : "text-muted-foreground hover:text-brand hover:bg-muted"
               }`}
             >
               {tab === "overview" && "Visão Geral"}
@@ -309,26 +311,26 @@ function AdminPageContent() {
 
       <div className="max-w-7xl mx-auto px-4 pb-8">
         {message && (
-          <div className="mb-4 p-3 bg-emerald-900/50 border border-emerald-700 rounded text-sm">{message}</div>
+          <div className="mb-4 p-3 bg-brand/20 border border-brand rounded text-sm text-brand">{message}</div>
         )}
 
         {activeTab === "overview" && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-card rounded-lg p-6 border border-border">
               <p className="text-muted-foreground text-sm">Empresas</p>
-              <p className="text-3xl font-bold">{stats.totalCompanies}</p>
+              <p className="text-3xl font-bold text-foreground">{stats.totalCompanies}</p>
             </div>
             <div className="bg-card rounded-lg p-6 border border-border">
               <p className="text-muted-foreground text-sm">Membros</p>
-              <p className="text-3xl font-bold">{stats.totalMembers}</p>
+              <p className="text-3xl font-bold text-foreground">{stats.totalMembers}</p>
             </div>
             <div className="bg-card rounded-lg p-6 border border-border">
               <p className="text-muted-foreground text-sm">Total Tickets</p>
-              <p className="text-3xl font-bold">{stats.totalTickets}</p>
+              <p className="text-3xl font-bold text-foreground">{stats.totalTickets}</p>
             </div>
             <div className="bg-card rounded-lg p-6 border border-border">
               <p className="text-muted-foreground text-sm">Abertos</p>
-              <p className="text-3xl font-bold text-yellow-400">{stats.openTickets}</p>
+              <p className="text-3xl font-bold text-yellow-500">{stats.openTickets}</p>
             </div>
           </div>
         )}
@@ -336,10 +338,10 @@ function AdminPageContent() {
         {activeTab === "companies" && (
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Empresas</h2>
+              <h2 className="text-xl font-semibold text-foreground">Empresas</h2>
               <button
                 onClick={() => setShowCreateCompany(!showCreateCompany)}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm"
+                className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark text-sm"
               >
                 + Nova Empresa
               </button>
@@ -347,32 +349,32 @@ function AdminPageContent() {
 
             {showCreateCompany && (
               <div className="bg-card rounded-lg p-6 border border-border mb-4">
-                <h3 className="font-semibold mb-4">Criar Nova Empresa</h3>
+                <h3 className="font-semibold text-foreground mb-4">Criar Nova Empresa</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <input
                     value={newCompany.name}
                     onChange={(e) => setNewCompany({ ...newCompany, name: e.target.value })}
                     placeholder="Nome da empresa"
-                    className="bg-muted border border-border rounded px-4 py-2"
+                    className="input"
                   />
                   <input
                     value={newCompany.slug}
                     onChange={(e) => setNewCompany({ ...newCompany, slug: e.target.value })}
                     placeholder="Código (slug)"
-                    className="bg-muted border border-border rounded px-4 py-2"
+                    className="input"
                   />
                 </div>
                 <div className="flex gap-2 mt-4">
                   <button
                     onClick={handleCreateCompany}
                     disabled={saving}
-                    className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-50"
+                    className="btn-primary"
                   >
                     {saving ? "Criando..." : "Criar"}
                   </button>
                   <button
                     onClick={() => setShowCreateCompany(false)}
-                    className="px-4 py-2 bg-muted text-white rounded hover:bg-muted/80"
+                    className="btn-muted"
                   >
                     Cancelar
                   </button>
@@ -385,11 +387,11 @@ function AdminPageContent() {
                 <div
                   key={company.id}
                   className={`bg-card rounded-lg p-4 border cursor-pointer transition ${
-                    currentCompany?.id === company.id ? "border-emerald-500" : "border-border hover:border-muted"
+                    currentCompany?.id === company.id ? "border-brand" : "border-border hover:border-brand/50"
                   }`}
                   onClick={() => setCurrentCompany(company)}
                 >
-                  <h3 className="font-semibold">{company.name}</h3>
+                  <h3 className="font-semibold text-foreground">{company.name}</h3>
                   <p className="text-sm text-muted-foreground">@{company.slug}</p>
                   <p className="text-xs text-muted-foreground mt-2">
                     Criado em {new Date(company.created_at).toLocaleDateString("pt-BR")}
@@ -403,7 +405,7 @@ function AdminPageContent() {
         {activeTab === "members" && currentCompany && (
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Membros - {currentCompany.name}</h2>
+              <h2 className="text-xl font-semibold text-foreground">Membros - {currentCompany.name}</h2>
             </div>
 
             <div className="bg-card rounded-lg border border-border overflow-hidden">
@@ -421,10 +423,10 @@ function AdminPageContent() {
                     <tr key={member.id} className="border-t border-border">
                       <td className="p-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center text-sm">
+                          <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center text-sm text-white">
                             {member.user_profiles?.display_name?.charAt(0).toUpperCase() || "?"}
                           </div>
-                          {member.user_profiles?.display_name || "Unknown"}
+                          <span className="text-foreground">{member.user_profiles?.display_name || "Unknown"}</span>
                         </div>
                       </td>
                       <td className="p-3 text-muted-foreground">{member.user_profiles?.email || "-"}</td>
@@ -432,7 +434,7 @@ function AdminPageContent() {
                         <select
                           value={member.role}
                           onChange={(e) => handleUpdateMemberRole(member.id, e.target.value)}
-                          className="bg-muted border border-border rounded px-2 py-1 text-sm"
+                          className="input py-1 px-2 text-sm"
                         >
                           <option value="MEMBER">Membro</option>
                           <option value="MANAGER">Gerente</option>
@@ -465,10 +467,10 @@ function AdminPageContent() {
         {activeTab === "chats" && currentCompany && (
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Chats - {currentCompany.name}</h2>
+              <h2 className="text-xl font-semibold text-foreground">Chats - {currentCompany.name}</h2>
               <button
                 onClick={() => setShowCreateChat(!showCreateChat)}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm"
+                className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark text-sm"
               >
                 + Novo Chat
               </button>
@@ -476,18 +478,18 @@ function AdminPageContent() {
 
             {showCreateChat && (
               <div className="bg-card rounded-lg p-6 border border-border mb-4">
-                <h3 className="font-semibold mb-4">Criar Novo Chat</h3>
+                <h3 className="font-semibold text-foreground mb-4">Criar Novo Chat</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <input
                     value={newChat.name}
                     onChange={(e) => setNewChat({ ...newChat, name: e.target.value })}
                     placeholder="Nome do chat"
-                    className="bg-muted border border-border rounded px-4 py-2"
+                    className="input"
                   />
                   <select
                     value={newChat.departmentId}
                     onChange={(e) => setNewChat({ ...newChat, departmentId: e.target.value })}
-                    className="bg-muted border border-border rounded px-4 py-2"
+                    className="input"
                   >
                     <option value="">Sem departamento</option>
                     {departments.map(d => (
@@ -495,7 +497,7 @@ function AdminPageContent() {
                     ))}
                   </select>
                 </div>
-                <label className="flex items-center gap-2 mt-4">
+                <label className="flex items-center gap-2 mt-4 text-foreground">
                   <input
                     type="checkbox"
                     checked={newChat.isPrivate}
@@ -508,13 +510,13 @@ function AdminPageContent() {
                   <button
                     onClick={handleCreateChat}
                     disabled={saving}
-                    className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-50"
+                    className="btn-primary"
                   >
                     {saving ? "Criando..." : "Criar"}
                   </button>
                   <button
                     onClick={() => setShowCreateChat(false)}
-                    className="px-4 py-2 bg-muted text-white rounded hover:bg-muted/80"
+                    className="btn-muted"
                   >
                     Cancelar
                   </button>
@@ -526,8 +528,8 @@ function AdminPageContent() {
               {chats.map(chat => (
                 <div key={chat.id} className="bg-card rounded-lg p-4 border border-border">
                   <div className="flex items-center gap-2">
-                    {chat.is_private ? <span className="text-yellow-400">🔒</span> : <span className="text-muted-foreground">#</span>}
-                    <h3 className="font-semibold">{chat.name}</h3>
+                    {chat.is_private ? <span className="text-yellow-500">🔒</span> : <span className="text-muted-foreground">#</span>}
+                    <h3 className="font-semibold text-foreground">{chat.name}</h3>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">{chat.is_private ? "Privado" : "Público"}</p>
                 </div>
@@ -542,7 +544,7 @@ function AdminPageContent() {
 
         {activeTab === "tickets" && currentCompany && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Chamados - {currentCompany.name}</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">Chamados - {currentCompany.name}</h2>
             <div className="bg-card rounded-lg border border-border overflow-hidden">
               <table className="w-full">
                 <thead className="bg-muted">
@@ -556,19 +558,19 @@ function AdminPageContent() {
                 <tbody>
                   {tickets.map(ticket => (
                     <tr key={ticket.id} className="border-t border-border">
-                      <td className="p-3">{ticket.title}</td>
+                      <td className="p-3 text-foreground">{ticket.title}</td>
                       <td className="p-3">
                         <span className={`px-2 py-1 rounded text-xs ${
-                          ticket.status === "open" ? "bg-yellow-900 text-yellow-300" :
-                          ticket.status === "closed" ? "bg-green-900 text-green-300" : "bg-emerald-900 text-emerald-300"
+                          ticket.status === "open" ? "bg-yellow-500/20 text-yellow-500" :
+                          ticket.status === "closed" ? "bg-green-500/20 text-green-500" : "bg-brand/20 text-brand"
                         }`}>
                           {ticket.status}
                         </span>
                       </td>
                       <td className="p-3">
                         <span className={`px-2 py-1 rounded text-xs ${
-                          ticket.priority === "high" ? "bg-red-900 text-red-300" :
-                          ticket.priority === "medium" ? "bg-yellow-900 text-yellow-300" : "bg-green-900 text-green-300"
+                          ticket.priority === "high" ? "bg-red-500/20 text-red-500" :
+                          ticket.priority === "medium" ? "bg-yellow-500/20 text-yellow-500" : "bg-green-500/20 text-green-500"
                         }`}>
                           {ticket.priority}
                         </span>
@@ -593,28 +595,28 @@ function AdminPageContent() {
 
         {activeTab === "reports" && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Relatórios</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">Relatórios</h2>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-card rounded-lg p-6 border border-border">
-                <h3 className="font-semibold mb-4">Tickets por Status</h3>
+                <h3 className="font-semibold text-foreground mb-4">Tickets por Status</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Abertos</span>
-                    <span className="font-semibold text-yellow-400">{stats.openTickets}</span>
+                    <span className="font-semibold text-yellow-500">{stats.openTickets}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Fechados</span>
-                    <span className="font-semibold text-green-400">{stats.closedTickets}</span>
+                    <span className="font-semibold text-green-500">{stats.closedTickets}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Total</span>
-                    <span className="font-semibold">{stats.totalTickets}</span>
+                    <span className="font-semibold text-foreground">{stats.totalTickets}</span>
                   </div>
                 </div>
               </div>
               <div className="bg-card rounded-lg p-6 border border-border">
-                <h3 className="font-semibold mb-4">Empresas Cadastradas</h3>
-                <p className="text-4xl font-bold">{stats.totalCompanies}</p>
+                <h3 className="font-semibold text-foreground mb-4">Empresas Cadastradas</h3>
+                <p className="text-4xl font-bold text-foreground">{stats.totalCompanies}</p>
                 <p className="text-muted-foreground text-sm mt-2">Total de empresas no sistema</p>
               </div>
             </div>
@@ -628,8 +630,8 @@ function AdminPageContent() {
 export default function AdminPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
       </div>
     }>
       <AdminPageContent />

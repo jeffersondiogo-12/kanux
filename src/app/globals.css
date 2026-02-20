@@ -1,26 +1,481 @@
 @import "tailwindcss";
 
+/* Emerald Dark Theme */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-brand: #10B981;      /* Emerald Green */
+  --color-brand-dark: #059669;
+  --color-brand-light: #D1FAE5;
+  --color-secondary: #161f2c;  /* Dark background */
+  --color-surface: #0f172a;    /* Dark surface */
+  
+  /* HSL variables for dark theme with emerald accents */
+  --background: 217 33% 8%;    /* Dark blue-gray */
+  --foreground: 155 20% 92%;   /* Light emerald tint */
+  --card: 217 28% 10%;
+  --card-foreground: 155 20% 92%;
+  --popover: 217 28% 10%;
+  --popover-foreground: 155 20% 92%;
+  --primary: 160 84% 39%;      /* Emerald */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 217 33% 14%;
+  --secondary-foreground: 155 20% 92%;
+  --muted: 217 25% 18%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 160 84% 39%;       /* Emerald accent */
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 70% 45%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 217 25% 18%;
+  --input: 217 25% 18%;
+  --ring: 160 84% 39%;
+  --radius: 14px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html, body { height: 100%; }
+
+body {
+  background-color: var(--color-surface);
+  color: #e2e8f0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+/* Layout helpers */
+.container-app {
+  max-width: 80rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+@media (min-width: 768px) {
+  .container-app {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.section {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
 }
+@media (min-width: 768px) {
+  .section {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}
+
+/* Fancy containers - Dark theme */
+.card {
+  background-color: #1e293b;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+/* Buttons - Emerald theme */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: white;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+.btn-primary:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  background-color: #334155;
+  color: #e2e8f0;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  border: none;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background-color: #475569;
+}
+.btn-secondary:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4);
+}
+
+.btn-muted {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  background-color: #1e293b;
+  color: #94a3b8;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  border: 1px solid #334155;
+  cursor: pointer;
+}
+.btn-muted:hover {
+  background-color: #334155;
+  color: #e2e8f0;
+}
+.btn-muted:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4);
+}
+
+/* Inputs - Dark theme */
+.input {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  transition: all 0.15s ease;
+}
+.input::placeholder {
+  color: #64748b;
+}
+.input:focus {
+  outline: none;
+  border-color: #10B981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.input-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #10B981;
+}
+
+/* Apply base styles to native elements */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  transition: all 0.15s ease;
+}
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="search"]::placeholder,
+textarea::placeholder {
+  color: #64748b;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="search"]:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #10B981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+/* Select options - dark theme */
+select option {
+  background-color: #1e293b;
+  color: #e2e8f0;
+}
+
+button[type="button"],
+button[type="submit"],
+.button,
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: white;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+}
+button[type="button"]:hover,
+button[type="submit"]:hover,
+.button:hover,
+.btn:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+button[type="button"]:focus,
+button[type="submit"]:focus,
+.button:focus,
+.btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4);
+}
+
+/* Search bar */
+.search {
+  position: relative;
+  width: 100%;
+}
+.search input[type="search"],
+.search input[type="text"] {
+  padding-left: 2.75rem;
+  padding-right: 2.75rem;
+}
+.search .icon-left {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #10B981;
+}
+.search .icon-right {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #10B981;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid;
+}
+
+.badge-green {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #10B981;
+  border-color: #10B981;
+}
+
+.badge-yellow {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.badge-red {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+/* Badge modern styles - Emerald */
+.badge-resolvido {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+}
+
+.badge-pendente {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+}
+
+.badge-andamento {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+/* Links */
+.link {
+  color: #10B981;
+  text-underline-offset: 4px;
+}
+.link:hover {
+  color: #059669;
+  text-decoration: underline;
+}
+
+/* Tables - Dark theme */
+.table {
+  width: 100%;
+  font-size: 0.875rem;
+}
+.table thead {
+  background-color: #1e293b;
+  border-bottom: 1px solid #334155;
+}
+.table th {
+  text-align: left;
+  padding: 0.75rem;
+  color: #10B981;
+  font-weight: 600;
+}
+.table td {
+  padding: 0.75rem;
+  border-top: 1px solid #334155;
+  color: #e2e8f0;
+}
+
+/* Chat bubbles - Dark theme */
+.chat-window {
+  background: linear-gradient(180deg, #1e293b, #0f172a);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.chat-bubble {
+  padding: 10px 12px;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.chat-bubble.me {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: white;
+  align-self: flex-end;
+}
+
+.chat-bubble.other {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pop {
+  0% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+.fade-in {
+  animation: fade-in 0.25s ease-out both;
+}
+
+.pop {
+  animation: pop 0.15s ease-out both;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #1e293b; }
+::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+/* Brand utilities */
+.bg-brand {
+  background: linear-gradient(90deg, #10B981, #059669);
+}
+
+.text-brand {
+  color: #10B981;
+}
+
+.border-brand {
+  border-color: #10B981;
+}
+
+/* Sidebar styles - Dark theme */
+.sidebar {
+  background: #1e293b;
+  color: #e2e8f0;
+  border-right: 1px solid #334155;
+}
+
+.sidebar ul li {
+  padding: 8px 6px;
+  border-radius: 8px;
+  color: #94a3b8;
+  transition: all 0.15s ease;
+}
+
+.sidebar ul li:hover {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+}
+
+/* Header gradient - Emerald dark */
+.header-grad {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid #334155;
+}
+
+/* Additional dark theme utilities */
+.bg-surface {
+  background-color: #0f172a;
+}
+
+.bg-card {
+  background-color: #1e293b;
+}
+
+.bg-muted {
+  background-color: #1e293b;
+}
+
+.text-foreground {
+  color: #e2e8f0;
+}
+
+.text-muted-foreground {
+  color: #94a3b8;
+}
+
+.border-border {
+  border-color: #334155;
+}
+
+/* Loading spinner - Emerald */
+.spinner-emerald {
+  border-color: rgba(16, 185, 129, 0.3);
+  border-top-color: #10B981;
+}
+
