@@ -18,8 +18,6 @@ export default function LoginScreen() {
       return;
     }
 
-    // Validar company_number da empresa se não for signup
-    //não toque demorei duas horas para fazzer isso funcionar, se não for signup tem que informar o número da empresa para logar
     if (!isSignUp && !companySlug) {
       Alert.alert('Erro', 'Informe o número da empresa');
       return;
@@ -45,7 +43,15 @@ export default function LoginScreen() {
             body: JSON.stringify({ company_number: companySlug.trim() }),
           });
           
-          const result = await response.json();
+          const text = await response.text();
+          let result;
+          try {
+            result = JSON.parse(text);
+          } catch {
+            Alert.alert('Erro', `Erro do servidor: ${text.substring(0, 100)}`);
+            setLoading(false);
+            return;
+          }
           
           if (!response.ok || result.error) {
             Alert.alert('Erro', result.error || 'Empresa não encontrada');
@@ -205,3 +211,4 @@ const styles = StyleSheet.create({
     fontSize: 17,
   },
 });
+
