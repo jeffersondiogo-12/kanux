@@ -35,7 +35,7 @@ export default function LoginScreen() {
       } else {
         // Usar API para verificar empresa (bypass RLS)
         try {
-          const response = await fetch('https://jeffersondiogo-12s-projects-kanux.vercel.app/api/verify-company', {
+          const response = await fetch('https://kanux.vercel.app/api/verify-company', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
