@@ -1,0 +1,372 @@
+"use client";
+import { useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+interface LoginProps {
+  onSuccess?: () => void;
+}
+
+export default function LoginForm({ onSuccess }: LoginProps) {
+  const [mode, setMode] = useState<"login" | "register">("login");
+  const [companyCode, setCompanyCode] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"success" | "error">("error");
+  const router = useRouter();
+
+  const handleLogin = async () => {
+    if (!email || !password || !companyCode) {
+      setMessage("Preencha todos os campos");
+      setMessageType("error");
+      return;
+    }
+
+    setLoading(true);
+    setMessage("");
+
+    try {
+      // First, sign in with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) {
+        setMessage(authError.message);
+        setMessageType("error");
+        setLoading(false);
+        return;
+      }
+
+      if (authData.user) {
+        // Get user profile to verify company
+        const { data: profile } = await supabase
+          .from("user_profiles")
+          .select(`
+            *,
+            company_members!inner (
+              company:companies!inner (slug, id, name)
+            )
+          `)
+          .eq("auth_user_id", authData.user.id)
+          .single();
+
+        if (!profile) {
+          await supabase.auth.signOut();
+          setMessage("Perfil não encontrado. Contacte o administrador.");
+          setMessageType("error");
+          setLoading(false);
+          return;
+        }
+
+        // Verify company code matches
+        const companyData = profile.company_members?.[0]?.company;
+        if (companyData?.slug !== companyCode.toLowerCase()) {
+          await supabase.auth.signOut();
+          setMessage("Código da empresa incorreto. Verifique e tente novamente.");
+          setMessageType("error");
+          setLoading(false);
+          return;
+        }
+
+        // Login successful - store company info in localStorage
+        localStorage.setItem("kanux_company_id", companyData?.id || "");
+        localStorage.setItem("kanux_company_slug", companyData?.slug || "");
+
+        setMessage("Login realizado com sucesso!");
+        setMessageType("success");
+        
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          router.push(`/chats?company=${companyData?.slug}`);
+        }
+      }
+    } catch (error: any) {
+      setMessage(error.message || "Erro ao fazer login");
+      setMessageType("error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    if (!email || !password || !companyCode || !displayName) {
+      setMessage("Preencha todos os campos");
+      setMessageType("error");
+      return;
+    }
+
+    if (password.length < 6) {
+      setMessage("A senha deve ter pelo menos 6 caracteres");
+      setMessageType("error");
+      return;
+    }
+
+    setLoading(true);
+    setMessage("");
+
+    try {
+      // Check if company exists
+      const { data: company } = await supabase
+        .from("companies")
+        .select("id, name, slug")
+        .eq("slug", companyCode.toLowerCase())
+        .single();
+
+      if (!company) {
+        setMessage("Empresa não encontrada. Verifique o código da empresa.");
+        setMessageType("error");
+        setLoading(false);
+        return;
+      }
+
+      // Sign up with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            display_name: displayName,
+          },
+        },
+      });
+
+      if (authError) {
+        setMessage(authError.message);
+        setMessageType("error");
+        setLoading(false);
+        return;
+      }
+
+      if (authData.user) {
+        // Create user profile
+        const { error: profileError } = await supabase
+          .from("user_profiles")
+          .insert({
+            auth_user_id: authData.user.id,
+            email: authData.user.email,
+            display_name: displayName,
+            is_super_admin: false,
+          });
+
+        if (profileError) {
+          setMessage("Erro ao criar perfil: " + profileError.message);
+          setMessageType("error");
+          setLoading(false);
+          return;
+        }
+
+        // Get the profile we just created
+        const { data: newProfile } = await supabase
+          .from("user_profiles")
+          .select("id")
+          .eq("auth_user_id", authData.user.id)
+          .single();
+
+        // Add user to company as MEMBER
+        if (newProfile) {
+          await supabase
+            .from("company_members")
+            .insert({
+              company_id: company.id,
+              user_profile_id: newProfile.id,
+              role: "MEMBER",
+            });
+        }
+
+        setMessage("Conta criada com sucesso! Faça login para continuar.");
+        setMessageType("success");
+        setMode("login");
+        setPassword("");
+      }
+    } catch (error: any) {
+      setMessage(error.message || "Erro ao criar conta");
+      setMessageType("error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg shadow-blue-500/25">
+            <span className="text-2xl font-bold text-white">K</span>
+          </div>
+          <h1 className="text-3xl font-bold text-white">Kanux</h1>
+          <p className="text-slate-400 mt-2">Plataforma de comunicação empresarial</p>
+        </div>
+
+        <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50 p-8">
+          <h2 className="text-2xl font-bold text-white mb-2">
+            {mode === "login" ? "Entrar" : "Criar conta"}
+          </h2>
+          <p className="text-slate-400 text-sm mb-6">
+            {mode === "login" 
+              ? "Informe os dados da sua empresa para acessar" 
+              : "Junte-se à sua equipe no Kanux"}
+          </p>
+
+          <div className="space-y-4">
+            {/* Company Code */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                Código da Empresa
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                  🏢
+                </span>
+                <input
+                  value={companyCode}
+                  onChange={(e) => setCompanyCode(e.target.value)}
+                  placeholder="minha-empresa"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                />
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                Informe o código fornecido pela sua empresa
+              </p>
+            </div>
+
+            {/* Display Name (register only) */}
+            {mode === "register" && (
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">
+                  Seu Nome
+                </label>
+                <input
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="João Silva"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                />
+              </div>
+            )}
+
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                E-mail
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                  ✉️
+                </span>
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  type="email"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  onKeyPress={(e) => e.key === "Enter" && (mode === "login" ? handleLogin() : handleRegister())}
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-1">
+                Senha
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                  🔒
+                </span>
+                <input
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  type="password"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  onKeyPress={(e) => e.key === "Enter" && (mode === "login" ? handleLogin() : handleRegister())}
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              onClick={mode === "login" ? handleLogin : handleRegister}
+              disabled={loading}
+              className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold rounded-lg transition-all shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Processando...
+                </span>
+              ) : mode === "login" ? (
+                "Entrar"
+              ) : (
+                "Criar conta"
+              )}
+            </button>
+
+            {/* Toggle Mode */}
+            <div className="text-center pt-4">
+              {mode === "login" ? (
+                <p className="text-slate-400 text-sm">
+                  Não tem uma conta?{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("register");
+                      setMessage("");
+                    }}
+                    className="text-blue-400 hover:text-blue-300 font-medium"
+                  >
+                    Criar conta
+                  </button>
+                </p>
+              ) : (
+                <p className="text-slate-400 text-sm">
+                  Já tem uma conta?{" "}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("login");
+                      setMessage("");
+                    }}
+                    className="text-blue-400 hover:text-blue-300 font-medium"
+                  >
+                    Fazer login
+                  </button>
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Message */}
+          {message && (
+            <div className={`mt-4 p-3 rounded-lg text-sm ${
+              messageType === "success" 
+                ? "bg-green-500/20 border border-green-500/50 text-green-400" 
+                : "bg-red-500/20 border border-red-500/50 text-red-400"
+            }`}>
+              {message}
+            </div>
+          )}
+        </div>
+
+        {/* Back to home */}
+        <div className="text-center mt-6">
+          <Link href="/" className="text-slate-500 hover:text-slate-400 text-sm">
+            ← Voltar para a página inicial
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+

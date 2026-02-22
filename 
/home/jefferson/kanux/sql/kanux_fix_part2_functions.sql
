@@ -1,0 +1,154 @@
+
+-- =====================================================
+-- KANUX: Script de Correção - PARTE 2
+-- Execute no Supabase SQL Editor após verificar a Parte 1
+-- =====================================================
+
+-- 1. HABILITAR RLS NAS TABELAS PRINCIPAIS
+-- =====================================================
+
+ALTER TABLE IF EXISTS public.user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.companies ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.company_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.departments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.chats ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.chat_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.tickets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.ticket_comments ENABLE ROW LEVEL SECURITY;
+
+-- 2. CRIAR/ATUALIZAR FUNÇÃO DE SINCRONIZAÇÃO DE USUÁRIOS
+-- =====================================================
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Verificar se o perfil já existe
+  IF NEW.email IS NOT NULL THEN
+    INSERT INTO public.user_profiles (auth_user_id, email, display_name, is_super_admin)
+    VALUES (
+      NEW.id,
+      NEW.email,
+      COALESCE(NEW.raw_user_meta_data->>'display_name', SPLIT_PART(NEW.email, '@', 1)),
+      FALSE
+    )
+    ON CONFLICT (auth_user_id) DO NOTHING;
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 3. CRIAR TRIGGER PARA NOVAS INSCRIÇÕES
+-- =====================================================
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- 4. CRIAR CHAVES ESTRANGEIRAS
+-- =====================================================
+
+-- FK: user_profiles.auth_user_id → auth.users.id
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.table_constraints 
+    WHERE constraint_name = 'user_profiles_auth_user_fkey' 
+    AND table_schema = 'public'
+  ) THEN
+    ALTER TABLE public.user_profiles 
+    ADD CONSTRAINT user_profiles_auth_user_fkey 
+    FOREIGN KEY (auth_user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+  END IF;
+END $$;
+
+-- FK: company_members.company_id → companies.id
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.table_constraints 
+    WHERE constraint_name = 'company_members_company_fkey' 
+    AND table_schema = 'public'
+  ) THEN
+    ALTER TABLE public.company_members 
+    ADD CONSTRAINT company_members_company_fkey 
+    FOREIGN KEY (company_id) REFERENCES public.companies(id) ON DELETE CASCADE;
+  END IF;
+END $$;
+
+-- FK: company_members.user_profile_id → user_profiles.id
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.table_constraints 
+    WHERE constraint_name = 'company_members_user_profile_fkey' 
+    AND table_schema = 'public'
+  ) THEN
+    ALTER TABLE public.company_members 
+    ADD CONSTRAINT company_members_user_profile_fkey 
+    FOREIGN KEY (user_profile_id) REFERENCES public.user_profiles(id) ON DELETE CASCADE;
+  END IF;
+END $$;
+
+-- 5. CRIAR ÍNDICES PARA PERFORMANCE
+-- =====================================================
+
+CREATE INDEX IF NOT EXISTS idx_user_id ON public.user_profiles(auth_user_profiles_auth_user_id);
+CREATE INDEX IF NOT EXISTS idx_company_members_user_profile ON public.company_members(user_profile_id);
+CREATE INDEX IF NOT EXISTS idx_company_members_company ON public.company_members(company_id);
+CREATE INDEX IF NOT EXISTS idx_tickets_company ON public.tickets(company_id);
+CREATE INDEX IF NOT EXISTS idx_tickets_creator ON public.tickets(creator_profile_id);
+CREATE INDEX IF NOT EXISTS idx_departments_company ON public.departments(company_id);
+CREATE INDEX IF NOT EXISTS idx_chats_company ON public.chats(company_id);
+
+-- 6. CRIAR FUNÇÕES HELPER
+-- =====================================================
+
+-- Função para obter perfil do usuário atual
+CREATE OR REPLACE FUNCTION public.get_current_user_profile()
+RETURNS TABLE(
+  id uuid,
+  auth_user_id uuid,
+  display_name text,
+  email text,
+  avatar_url text,
+  is_super_admin boolean,
+  created_at timestamptz
+) LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT up.*
+  FROM public.user_profiles up
+  WHERE up.auth_user_id = auth.uid();
+END;
+$$;
+
+-- Função para listar empresas do usuário atual
+CREATE OR REPLACE FUNCTION public.get_user_companies()
+RETURNS TABLE(
+  id uuid,
+  name text,
+  slug text,
+  role text,
+  created_at timestamptz
+) LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT c.id, c.name, c.slug, cm.role, c.created_at
+  FROM public.companies c
+  JOIN public.company_members cm ON cm.company_id = c.id
+  JOIN public.user_profiles up ON up.id = cm.user_profile_id
+  WHERE up.auth_user_id = auth.uid();
+END;
+$$;
+
+-- =====================================================
+-- FIM DA PARTE 2
+-- Execute a Parte 3 para políticas RLS
+-- =====================================================
+

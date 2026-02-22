@@ -1,0 +1,59 @@
+
+-- =====================================================
+-- KANUX: Políticas RLS - PARTE 3d
+-- ticket_comments e grants
+-- Execute no Supabase SQL Editor
+-- =====================================================
+
+-- 1. POLÍTICAS PARA ticket_comments
+DROP POLICY IF EXISTS "Members can read comments" ON public.ticket_comments;
+DROP POLICY IF EXISTS "Members can create comments" ON public.ticket_comments;
+
+CREATE POLICY "Members can read comments" ON public.ticket_comments
+  FOR SELECT TO authenticated
+  USING (
+    ticket_id IN (
+      SELECT id FROM public.tickets
+      WHERE company_id IN (
+        SELECT company_id FROM public.company_members
+        WHERE user_profile_id IN (
+          SELECT id FROM public.user_profiles WHERE auth_user_id = auth.uid()
+        )
+      )
+    )
+  );
+
+CREATE POLICY "Members can create comments" ON public.ticket_comments
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    ticket_id IN (
+      SELECT id FROM public.tickets
+      WHERE company_id IN (
+        SELECT company_id FROM public.company_members
+        WHERE user_profile_id IN (
+          SELECT id FROM public.user_profiles WHERE auth_user_id = auth.uid()
+        )
+      )
+    )
+  );
+
+-- 2. GRANT PERMISSIONS
+GRANT SELECT ON public.user_profiles TO authenticated;
+GRANT SELECT ON public.companies TO authenticated;
+GRANT SELECT ON public.company_members TO authenticated;
+GRANT SELECT ON public.departments TO authenticated;
+GRANT SELECT ON public.chats TO authenticated;
+GRANT SELECT ON public.tickets TO authenticated;
+GRANT SELECT ON public.ticket_comments TO authenticated;
+
+GRANT INSERT ON public.user_profiles TO authenticated;
+GRANT INSERT ON public.companies TO authenticated;
+GRANT INSERT ON public.company_members TO authenticated;
+GRANT INSERT ON public.tickets TO authenticated;
+GRANT INSERT ON public.ticket_comments TO authenticated;
+
+GRANT UPDATE ON public.user_profiles TO authenticated;
+GRANT UPDATE ON public.companies TO authenticated;
+GRANT UPDATE ON public.tickets TO authenticated;
+GRANT UPDATE ON public.ticket_comments TO authenticated;
+

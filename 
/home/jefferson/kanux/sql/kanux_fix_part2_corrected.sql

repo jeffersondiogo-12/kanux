@@ -1,0 +1,90 @@
+
+-- =====================================================
+-- KANUX: Script de Correção - PARTE 2 (CORRIGIDO)
+-- Execute no Supabase SQL Editor
+-- =====================================================
+
+-- 1. HABILITAR RLS NAS TABELAS PRINCIPAIS
+ALTER TABLE IF EXISTS public.user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.companies ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.company_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.departments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.chats ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.chat_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.tickets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.ticket_comments ENABLE ROW LEVEL SECURITY;
+
+-- 2. CRIAR/ATUALIZAR FUNÇÃO DE SINCRONIZAÇÃO DE USUÁRIOS
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.email IS NOT NULL THEN
+    INSERT INTO public.user_profiles (auth_user_id, email, display_name, is_super_admin)
+    VALUES (
+      NEW.id,
+      NEW.email,
+      COALESCE(NEW.raw_user_meta_data->>'display_name', SPLIT_PART(NEW.email, '@', 1)),
+      FALSE
+    )
+    ON CONFLICT (auth_user_id) DO NOTHING;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 3. CRIAR TRIGGER PARA NOVAS INSCRIÇÕES
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- 4. ÍNDICES CORRIGIDOS
+CREATE INDEX IF NOT EXISTS idx_user_profiles_auth_user_id ON public.user_profiles(auth_user_id);
+CREATE INDEX IF NOT EXISTS idx_company_members_user_profile ON public.company_members(user_profile_id);
+CREATE INDEX IF NOT EXISTS idx_company_members_company ON public.company_members(company_id);
+CREATE INDEX IF NOT EXISTS idx_tickets_company ON public.tickets(company_id);
+CREATE INDEX IF NOT EXISTS idx_tickets_creator ON public.tickets(creator_profile_id);
+CREATE INDEX IF NOT EXISTS idx_departments_company ON public.departments(company_id);
+CREATE INDEX IF NOT EXISTS idx_chats_company ON public.chats(company_id);
+
+-- 5. FUNÇÕES HELPER
+CREATE OR REPLACE FUNCTION public.get_current_user_profile()
+RETURNS TABLE(
+  id uuid,
+  auth_user_id uuid,
+  display_name text,
+  email text,
+  avatar_url text,
+  is_super_admin boolean,
+  created_at timestamptz
+) LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT up.*
+  FROM public.user_profiles up
+  WHERE up.auth_user_id = auth.uid();
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_user_companies()
+RETURNS TABLE(
+  id uuid,
+  name text,
+  slug text,
+  role text,
+  created_at timestamptz
+) LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT c.id, c.name, c.slug, cm.role, c.created_at
+  FROM public.companies c
+  JOIN public.company_members cm ON cm.company_id = c.id
+  JOIN public.user_profiles up ON up.id = cm.user_profile_id
+  WHERE up.auth_user_id = auth.uid();
+END;
+$$;
+

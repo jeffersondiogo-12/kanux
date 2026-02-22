@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Kanux",
+    "slug": "kanux-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "kanux",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a2e"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kanux.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1a1a2e"
+      },
+      "package": "com.kanux.mobile"
+    },
+    
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "supabaseUrl": "https://amybrdlkfocmiolcnybl.supabase.co",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFteWJyZGxrZm9jbWlvbGNueWJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0MDQ3ODYsImV4cCI6MjA4Mzk4MDc4Nn0.B4R_9h58oSeC56l_eLafQk1fJpI29cM8T5rzqM5s2lg"
+    }
+  }
+}

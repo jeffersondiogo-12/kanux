@@ -1,0 +1,59 @@
+
+-- =====================================================
+-- KANUX: Políticas RLS - PARTE 3c
+-- chats e tickets
+-- Execute no Supabase SQL Editor
+-- =====================================================
+
+-- 1. POLÍTICAS PARA chats
+DROP POLICY IF EXISTS "Members can read chats" ON public.chats;
+
+CREATE POLICY "Members can read chats" ON public.chats
+  FOR SELECT TO authenticated
+  USING (
+    company_id IN (
+      SELECT company_id FROM public.company_members
+      WHERE user_profile_id IN (
+        SELECT id FROM public.user_profiles WHERE auth_user_id = auth.uid()
+      )
+    ) OR is_private = false
+  );
+
+-- 2. POLÍTICAS PARA tickets
+DROP POLICY IF EXISTS "Members can read tickets" ON public.tickets;
+DROP POLICY IF EXISTS "Members can create tickets" ON public.tickets;
+DROP POLICY IF EXISTS "Assignees can update tickets" ON public.tickets;
+
+CREATE POLICY "Members can read tickets" ON public.tickets
+  FOR SELECT TO authenticated
+  USING (
+    company_id IN (
+      SELECT company_id FROM public.company_members
+      WHERE user_profile_id IN (
+        SELECT id FROM public.user_profiles WHERE auth_user_id = auth.uid()
+      )
+    )
+  );
+
+CREATE POLICY "Members can create tickets" ON public.tickets
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    company_id IN (
+      SELECT company_id FROM public.company_members
+      WHERE user_profile_id IN (
+        SELECT id FROM public.user_profiles WHERE auth_user_id = auth.uid()
+      )
+    )
+  );
+
+CREATE POLICY "Assignees can update tickets" ON public.tickets
+  FOR UPDATE TO authenticated
+  USING (
+    company_id IN (
+      SELECT company_id FROM public.company_members
+      WHERE user_profile_id IN (
+        SELECT id FROM public.user_profiles WHERE auth_user_id = auth.uid()
+      )
+    )
+  );
+
